@@ -1,21 +1,25 @@
 <?php
-$id=$_REQUEST["id"];
-$password=$_REQUEST["passwd"];
-$name=$_REQUEST["name"];
-$tel=$_REQUEST["tel"];
+$id = $_REQUEST["id"];
+$password = $_REQUEST["passwd"];
+$name = $_REQUEST["name"];
+$tel = $_REQUEST["tel"];
 
+require_once("MYDB.php");
+$pdo=db_connect();
 
-$db_user="ppp";
-$db_pass="123456";
-$db_host="localhost";
-$db_name="phptest";
-$db_type="mysql";
-$dsn="$db_type:host=$db_host;dbname=$db_name;charset=utf8";
-try{ 
-    $pdo= new PDO($dsn,$db_user,$db_pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES,PDO::ERRMODE_EXCEPTION);
+try{
+    $pdo->beginTransaction();
+    $sql="insert into member(id, passwd, name, tel, reg_date) values(?,?,?,?, now())";
+    $stmh=$pdo->prepare($sql);
+    $stmh->bindValue(1, $id,PDO::PARAM_STR);
+    $stmh->bindValue(2, $passwd,PDO::PARAM_STR);
+    $stmh->bindValue(3, $name,PDO::PARAM_STR);
+    $stmh->bindValue(4, $tel,PDO::PARAM_STR);
+    $stmh->execute();
+    $pdo->commit();
+    print "data appended";
 
-}catch(Exception $ex){
-
+} catch(PDOException $Exception){
+    $pdo->rollBack();
+    print "error:".$Exception->getMessage();
 }
